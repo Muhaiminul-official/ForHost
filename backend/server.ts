@@ -38,7 +38,10 @@ async function startServer() {
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
-      origin: "https://bloodlink-frontend-e0jx.onrender.com", // allow all origins for dev
+      origin: [
+    "https://bloodlink-frontend-e0jx.onrender.com",
+    "http://localhost:5173"
+  ],// allow all origins for dev
       methods: ["GET", "POST"]
     }
   });
