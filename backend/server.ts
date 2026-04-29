@@ -27,7 +27,7 @@ async function startServer() {
   
   // Enable CORS for frontend running on different ports locally
   app.use(cors({
-  origin: "https://bloodlink-frontend-e0jx.onrender.com/",
+  origin: "https://bloodlink-frontend-e0jx.onrender.com",
   credentials: true
 }));
   app.use(express.json());
