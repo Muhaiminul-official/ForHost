@@ -10,24 +10,27 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/google`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'https://bloodlink-backend-pcro.onrender.com/'}/api/auth/google`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: credentialResponse.credential }),
         },
-        body: JSON.stringify({ token: credentialResponse.credential }),
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success('Logged in with Google!');
-        
+
         if (Notification.permission === 'granted') {
           await subscribeToPush(data.token);
         }
-        
+
         onLogin();
       } else {
         let errorMessage = 'Google login failed';
@@ -35,7 +38,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
           const errorData = await response.json();
           if (errorData && errorData.message) errorMessage = errorData.message;
         } catch (e) {
-          console.error("Non-JSON error response from API");
+          console.error('Non-JSON error response from API');
         }
         toast.error(errorMessage);
       }
@@ -52,24 +55,27 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     const password = formData.get('password');
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
         },
-        body: JSON.stringify({ email, password }),
-      });
+      );
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         toast.success('Logged in successfully!');
-        
+
         if (Notification.permission === 'granted') {
           await subscribeToPush(data.token);
         }
-        
+
         onLogin();
       } else {
         let errorMessage = 'Invalid email or password';
@@ -79,7 +85,7 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
             errorMessage = errorData.message;
           }
         } catch (e) {
-          console.error("Non-JSON error response from API");
+          console.error('Non-JSON error response from API');
         }
         toast.error(errorMessage);
       }
@@ -98,16 +104,20 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               <Droplet className="w-6 h-6 text-red-500" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2">Welcome Back</h2>
-          <p className="text-gray-600 dark:text-gray-400 text-center mb-8">Sign in to continue to BloodLink</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2">
+            Welcome Back
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center mb-8">
+            Sign in to continue to BloodLink
+          </p>
 
           <div className="flex justify-center mb-6">
-             <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => {
-                  toast.error('Google login failed');
-                }}
-             />
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                toast.error('Google login failed');
+              }}
+            />
           </div>
 
           <div className="relative mb-6">
@@ -115,35 +125,58 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
               <div className="w-full border-t border-gray-200 dark:border-white/10"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-[#111111] text-gray-500">Or continue with</span>
+              <span className="px-2 bg-white dark:bg-[#111111] text-gray-500">
+                Or continue with
+              </span>
             </div>
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                Email Address
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-500" />
                 </div>
-                <input name="email" required type="email" className="w-full bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-red-500 transition-colors" placeholder="you@example.com" />
+                <input
+                  name="email"
+                  required
+                  type="email"
+                  className="w-full bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-red-500 transition-colors"
+                  placeholder="you@example.com"
+                />
               </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Password</label>
-                <a href="#" className="text-sm text-red-500 hover:text-red-400">Forgot password?</a>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Password
+                </label>
+                <a href="#" className="text-sm text-red-500 hover:text-red-400">
+                  Forgot password?
+                </a>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-500" />
                 </div>
-                <input name="password" required type="password" className="w-full bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-red-500 transition-colors" placeholder="••••••••" />
+                <input
+                  name="password"
+                  required
+                  type="password"
+                  className="w-full bg-gray-100 dark:bg-[#1a1a1a] border border-gray-300 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-red-500 transition-colors"
+                  placeholder="••••••••"
+                />
               </div>
             </div>
 
-            <button type="submit" className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 mt-6">
+            <button
+              type="submit"
+              className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-bold transition-colors flex items-center justify-center gap-2 mt-6"
+            >
               Sign In
               <ArrowRight className="w-5 h-5" />
             </button>
@@ -151,7 +184,10 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
 
           <p className="text-center text-gray-600 dark:text-gray-400 mt-6">
             Don't have an account?{' '}
-            <button onClick={() => navigate('/register')} className="text-red-500 hover:text-red-400 font-medium">
+            <button
+              onClick={() => navigate('/register')}
+              className="text-red-500 hover:text-red-400 font-medium"
+            >
               Register now
             </button>
           </p>

@@ -1,29 +1,32 @@
-import express from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import User from "../models/User.ts";
-import { OAuth2Client } from "google-auth-library";
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/User.ts';
+import { OAuth2Client } from 'google-auth-library';
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
-const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || "769930194448-3c995g1d2gv4qou7tfhrb5p1gg0vhgcp.apps.googleusercontent.com";
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+const GOOGLE_CLIENT_ID =
+  process.env.VITE_GOOGLE_CLIENT_ID ||
+  '426841026024-78am0akqjms589mpq4brgmrh2g7lfggg.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-router.post("/google", async (req, res) => {
+router.post('/google', async (req, res) => {
   try {
     const { token } = req.body;
     const ticket = await googleClient.verifyIdToken({
       idToken: token,
       audience: GOOGLE_CLIENT_ID,
     });
-    
+
     const payload = ticket.getPayload();
-    if (!payload) return res.status(400).json({ message: "Invalid Google token" });
-    
+    if (!payload)
+      return res.status(400).json({ message: 'Invalid Google token' });
+
     const { sub: googleId, email, name, picture } = payload;
-    
+
     let user = await User.findOne({ email });
-    
+
     if (!user) {
       // Create new user if they don't exist yet
       user = new User({
@@ -31,8 +34,8 @@ router.post("/google", async (req, res) => {
         email,
         googleId,
         picture,
-        role: "User",
-        status: "Available"
+        role: 'User',
+        status: 'Available',
       });
       await user.save();
     } else {
@@ -41,9 +44,11 @@ router.post("/google", async (req, res) => {
       if (picture && !user.picture) user.picture = picture;
       await user.save();
     }
-    
-    const authToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
-    
+
+    const authToken = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: '1d',
+    });
+
     res.json({
       token: authToken,
       user: {
@@ -52,29 +57,45 @@ router.post("/google", async (req, res) => {
         email: user.email,
         bloodGroup: user.bloodGroup,
         role: user.role,
-        picture: user.picture
-      }
+        picture: user.picture,
+      },
     });
-
   } catch (error) {
-    console.error("Google login error:", error);
-    res.status(500).json({ message: "Server error", error });
+    console.error('Google login error:', error);
+    res.status(500).json({ message: 'Server error', error });
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, studentId, department, batch, dob, bloodGroup, phone, division, district, upazila } = req.body;
-    
+    const {
+      name,
+      email,
+      password,
+      studentId,
+      department,
+      batch,
+      dob,
+      bloodGroup,
+      phone,
+      division,
+      district,
+      upazila,
+    } = req.body;
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists with that email." });
+      return res
+        .status(400)
+        .json({ message: 'User already exists with that email.' });
     }
-    
+
     if (studentId) {
       const existingStudentId = await User.findOne({ studentId });
       if (existingStudentId) {
-        return res.status(400).json({ message: "Student ID is already registered." });
+        return res
+          .status(400)
+          .json({ message: 'Student ID is already registered.' });
       }
     }
 
@@ -91,46 +112,52 @@ router.post("/register", async (req, res) => {
       phone,
       division,
       district,
-      upazila
+      upazila,
     });
 
     await user.save();
-    
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
-    
-    res.status(201).json({ 
-      message: "User registered successfully",
+
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: '1d',
+    });
+
+    res.status(201).json({
+      message: 'User registered successfully',
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         bloodGroup: user.bloodGroup,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error: any) {
     console.error('Registration server error:', error);
-    res.status(500).json({ message: "Server error", error: error.message || error });
+    res
+      .status(500)
+      .json({ message: 'Server error', error: error.message || error });
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
-    
+    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: '1d',
+    });
+
     res.json({
       token,
       user: {
@@ -138,11 +165,11 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         bloodGroup: user.bloodGroup,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ message: 'Server error', error });
   }
 });
 
