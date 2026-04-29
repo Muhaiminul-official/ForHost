@@ -29,7 +29,8 @@ async function startServer() {
   app.use(cors({
   origin: [
     "https://bloodlink-frontend-e0jx.onrender.com",
-    "http://localhost:5173"
+    "http://localhost:5173",
+    "https://cu-blood.vercel.app"
   ],
   credentials: true
 }));
@@ -40,7 +41,9 @@ async function startServer() {
     cors: {
       origin: [
     "https://bloodlink-frontend-e0jx.onrender.com",
-    "http://localhost:5173"
+    "http://localhost:5173",
+        "https://cu-blood.vercel.app"
+        
   ],// allow all origins for dev
       methods: ["GET", "POST"]
     }
