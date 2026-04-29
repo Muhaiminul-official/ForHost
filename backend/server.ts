@@ -1,0 +1,111 @@
+import express from "express";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { connectDB } from "./config/db.ts";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import cors from "cors";
+import { initWebPush } from "./utils/webpush.ts";
+
+// Import routes
+import authRoutes from "./routes/auth.ts";
+import requestRoutes from "./routes/requests.ts";
+import userRoutes from "./routes/users.ts";
+import directRequestRoutes from "./routes/directRequests.ts";
+import notificationRoutes from "./routes/notifications.ts";
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+async function startServer() {
+  const app = express();
+  const PORT = process.env.PORT || 3000;
+  
+  // Enable CORS for frontend running on different ports locally
+  app.use(cors({ origin: true, credentials: true }));
+  app.use(express.json());
+  
+  const httpServer = createServer(app);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*", // allow all origins for dev
+      methods: ["GET", "POST"]
+    }
+  });
+
+  app.set("io", io);
+
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (token) {
+      jwt.verify(token, process.env.JWT_SECRET || 'supersecretkey', (err: any, decoded: any) => {
+        if (err) return next();
+        socket.data.user = decoded;
+        next();
+      });
+    } else {
+      next();
+    }
+  });
+
+  io.on("connection", (socket) => {
+    console.log("A user connected:", socket.id);
+    
+    if (socket.data.user) {
+      // Join a room with their user ID so we can target them
+      socket.join(socket.data.user.id);
+      console.log(`User ${socket.data.user.id} joined their room`);
+    }
+
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
+
+  // Connect to MongoDB
+  await connectDB();
+  await initWebPush();
+
+  // API routes
+  app.use("/api/auth", authRoutes);
+  app.use("/api/requests", requestRoutes);
+  app.use("/api/users", userRoutes);
+  app.use("/api/direct-requests", directRequestRoutes);
+  app.use("/api/notifications", notificationRoutes);
+
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  // Vite middleware for development
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const { createServer: createViteServer } = await import("vite");
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+        configFile: path.resolve(process.cwd(), 'vite.config.ts'),
+        root: path.resolve(process.cwd(), 'frontend'),
+      });
+      app.use(vite.middlewares);
+    } catch (e) {
+      console.warn("Vite not found or failed to start, running in standalone API mode.", (e as Error).message);
+    }
+  } else {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
+
+  httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+startServer();
