@@ -18,10 +18,10 @@ export const sendPushNotification = async (user: any, payload: { title: string, 
     const tokens = user.pushSubscriptions;
 
     const message = {
-      notification: {
-        title: payload.title,
-        body: payload.message
-      },
+      // notification: {
+      //   title: payload.title,
+      //   body: payload.message
+      // },
       data: {
         title: payload.title,
         message: payload.message,
