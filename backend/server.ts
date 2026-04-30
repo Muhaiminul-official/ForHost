@@ -30,7 +30,8 @@ async function startServer() {
   origin: [
     "https://bloodlink-frontend-e0jx.onrender.com",
     "http://localhost:5173",
-    "https://cu-blood.vercel.app"
+    "https://cu-blood.vercel.app",
+    "https://org-frontend.onrender.com"
   ],
   credentials: true
 }));
@@ -42,7 +43,8 @@ async function startServer() {
       origin: [
     "https://bloodlink-frontend-e0jx.onrender.com",
     "http://localhost:5173",
-        "https://cu-blood.vercel.app"
+        "https://cu-blood.vercel.app",
+        "https://org-frontend.onrender.com"
         
   ],// allow all origins for dev
       methods: ["GET", "POST"]
