@@ -32,17 +32,17 @@ router.post("/test-push", verifyToken, async (req: any, res) => {
     }
 
     // Also emit via Socket.IO
-    const io = req.app.get("io");
-    if (io) {
-      io.to(user._id.toString()).emit("notification", {
-        _id: "test-" + Date.now(),
-        message: "This is a test real-time notification!",
-        type: "Test",
-        link: "/profile",
-        createdAt: new Date(),
-        read: false
-      });
-    }
+    // const io = req.app.get("io");
+    // if (io) {
+    //   io.to(user._id.toString()).emit("notification", {
+    //     _id: "test-" + Date.now(),
+    //     message: "This is a test real-time notification!",
+    //     type: "Test",
+    //     link: "/profile",
+    //     createdAt: new Date(),
+    //     read: false
+    //   });
+    // }
 
     res.json({ message: "Test notifications initiated (FCM tokens: " + (user.pushSubscriptions?.length || 0) + ")" });
   } catch (error: any) {
