@@ -31,7 +31,8 @@ async function startServer() {
     "https://bloodlink-frontend-e0jx.onrender.com",
     "http://localhost:5173",
     "https://cu-blood.vercel.app",
-    "https://org-frontend.onrender.com"
+    "https://org-frontend.onrender.com",
+    "https://ais-dev-wof6l3j7ywxzln3dfbloc6-171726856505.asia-southeast1.run.app"
   ],
   credentials: true
 }));
@@ -44,7 +45,8 @@ async function startServer() {
     "https://bloodlink-frontend-e0jx.onrender.com",
     "http://localhost:5173",
         "https://cu-blood.vercel.app",
-        "https://org-frontend.onrender.com"
+        "https://org-frontend.onrender.com",
+        "https://ais-dev-wof6l3j7ywxzln3dfbloc6-171726856505.asia-southeast1.run.app"
         
   ],// allow all origins for dev
       methods: ["GET", "POST"]
